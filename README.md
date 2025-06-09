@@ -2,7 +2,6 @@
 
 #### Use HTML5 `localStorage` to completely fill up Chrome, Safari, and IE users' hard disks.
 
-#### Check out the [demo](http://www.filldisk.com)!
 
 #### Info about how this works [in this blog post](http://feross.org/fill-disk/).
 
