@@ -1,52 +1,85 @@
-# `filldisk.js` - Masterful trolling with HTML5 localStorage
+# `filldisk.js` – Abuse HTML5 localStorage to Fill a User's Disk
 
-#### Use HTML5 `localStorage` to completely fill up Chrome, Safari, and IE users' hard disks.
+## Overview
+
+`filldisk.js` is a proof-of-concept that demonstrates how a malicious site can exploit HTML5 `localStorage` to rapidly consume a user's hard drive space. It works on Chrome, Safari (including iOS), and Internet Explorer by repeatedly storing large data chunks across numerous subdomains.
+
+This script is intended for educational purposes to raise awareness about improper storage limit enforcement.
+
+Read the full explanation here:  
+[👉 Blog Post: How to Fill a Disk](http://feross.org/fill-disk/)
+
+---
+
+## Features
+
+- Rapidly fills disk space on Chrome, Safari, and IE
+- About **1 GB every 16 seconds** on SSD machines
+- Causes full browser crashes on 32-bit systems
+- Firefox resists this technique due to better storage policies
+- Includes a "Stop the madness" button to reclaim space
+
+---
+
+## How It Works
+
+The HTML5 `localStorage` API allows web pages to store up to 5–10 MB of data per origin. But many browsers do **not enforce limits across subdomains**.
+
+This script generates many subdomains like:
+
+1.filldisk.com
+2.filldisk.com
+3.filldisk.com
+...
+
+yaml
+Copy
+Edit
+
+Each subdomain gets its own `localStorage` space, bypassing origin-based limits and accumulating gigabytes of data until disk space is exhausted.
+
+### Browser limits (as per spec):
+
+- Chrome: 2.5MB per origin (in theory)
+- Firefox: 5MB per origin (enforced correctly ✅)
+- IE: 10MB per origin
+- Safari: 5MB per origin
+
+However, in practice, **Chrome, Safari, and IE do not block this subdomain abuse.**
+
+---
+
+## How to Run This
+
+> ⚠️ Warning: This can lock up your browser or system. Use only in a test environment or sandboxed browser.
+
+1. Clone or download the project files.
+2. Host the files locally:
+
+```bash
+python -m http.server 8080
+Visit the site in Chrome or Safari:
 
 
-#### Info about how this works [in this blog post](http://feross.org/fill-disk/).
+http://localhost:8080
+Observe your storage fill up quickly.
 
-## Features:
+To simulate full abuse, you'll need to test on actual subdomains — either by using ngrok, a wildcard DNS setup, or a hosted server with multiple subdomains.
 
-- Fills up the user's hard disk on Chrome, Safari (iOS and desktop), and IE.
-- Fills up **1 GB every 16 seconds** on my Macbook Pro Retina (with solid state drive)
-- Tested with latest Chrome (25), Safari (6), IE (10).
-- For 32-bit browsers, like Chrome, **the entire browser may crash** before the disk is filled.
-- Does not work on Firefox, since Firefox's implementation of localStorage is smarter.
-- Includes a button to reclaim your disk space ;)
+How to Reclaim Disk Space
+Chrome
+Go to:
+Settings > Privacy and Security > Site Settings > View permissions and data stored across sites
 
-## How it works
+Search for your local server or subdomain
 
-The [HTML5 localStorage](http://www.w3.org/TR/webstorage/) standard was developed to allow sites to store larger amounts of data (like 5-10 MB) than was previously allowed by cookies (like 4KB). The standard is supported in all modern browsers (Chrome, Firefox, Safari, IE, etc.).
+Click "Clear data"
 
-The standard anticipated that sites might abuse this feature ;) and advised that browsers limit the total amount of storage space that each origin could use. Quoting from the HTML5 spec:
+Safari
+Go to:
+Preferences > Privacy > Manage Website Data
 
-> User agents should limit the total amount of space allowed for storage areas.
+Find and delete the storage entries
 
-The [current limits](http://en.wikipedia.org/wiki/Web_storage#Storage_size) are:
-
-- 2.5 MB per origin in Google Chrome
-- 5 MB per origin in Mozilla Firefox and Opera
-- 10 MB per origin in Internet Explorer
-
-However, what if we get clever and make lots of subdomains like `1.filldisk.com`, `2.filldisk.com`, `3.filldisk.com`, and so on? Should we get 5MB of space per subdomain? **The standard says no.**
-
-> User agents should guard against sites storing data under the origins other affiliated sites, e.g. storing up to the limit in a1.example.com, a2.example.com, a3.example.com, etc, circumventing the main example.com storage limit.
->
-> A mostly arbitrary limit of five megabytes per origin is recommended.
-
-However, **Chrome, Safari, and IE currently do not implement any such storage limit**. Thus, cleverly coded websites effectively have unlimited storage space on their visitor's computer.
-
-I wrote [http://www.filldisk.com](fill-disk.js) as a proof-of-concept to include with the bug reports I filed. Bug reports here:
-
-- [Chromium bug report](https://code.google.com/p/chromium/issues/detail?id=178980)
-- [Apple bug report](http://openradar.appspot.com/radar?id=2792401)
-- [IE Bug Report](https://connect.microsoft.com/IE/feedback/details/780246/localstorage-stores-unlimited-amount-of-data-with-unlimited-subdomains-against-spec) (requires login)
-- Opera bug report (closed tracker, bug ID: DSK-383073) - fills to 75MB in my testing, which isn't so bad.
-
-## How to reclaim space (last resort)
-
-If clicking on the "Stop the madness" button fails to give back your disk space, you can reclaim it manually (in Chrome) by going to Preferences > Show advanced settings... > Content settings > All cookies and site data... > search for "filldisk" > Remove all.
-
-I'm less familiar with other browsers, but deleting your cookies and cache will definitely do the trick.
-
+Or use the "Stop the madness" button in the UI (if enabled).
 
